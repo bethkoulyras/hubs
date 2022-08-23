@@ -3,32 +3,36 @@ import PropTypes from "prop-types";
 import { mediaSort, getMediaType } from "../../utils/media-sorting.js";
 
 function getDisplayString(el) {
-  // Having a listed-media component does not guarantee the existence of a media-loader component,
-  // so don't crash if there isn't one.
-  const url = (el.components["media-loader"] && el.components["media-loader"].data.src) || "";
-  const split = url.split("/");
-  const resourceName = split[split.length - 1].split("?")[0];
-  let httpIndex = -1;
-  for (let i = 0; i < split.length; i++) {
-    if (split[i].indexOf("http") !== -1) {
-      httpIndex = i;
+  if (el.object3D.name !== undefined) {
+    return el.object3D.name.split("_").join(" ");
+  } else {
+    // Having a listed-media component does not guarantee the existence of a media-loader component,
+    // so don't crash if there isn't one.
+    const url = (el.components["media-loader"] && el.components["media-loader"].data.src) || "";
+    const split = url.split("/");
+    const resourceName = split[split.length - 1].split("?")[0];
+    let httpIndex = -1;
+    for (let i = 0; i < split.length; i++) {
+      if (split[i].indexOf("http") !== -1) {
+        httpIndex = i;
+      }
     }
-  }
 
-  let host = "";
-  let lessHost = "";
-  if (httpIndex !== -1 && split.length > httpIndex + 3) {
-    host = split[httpIndex + 2];
-    const hostSplit = host.split(".");
-    if (hostSplit.length > 1) {
-      lessHost = `${hostSplit[hostSplit.length - 2]}.${hostSplit[hostSplit.length - 1]}`;
+    let host = "";
+    let lessHost = "";
+    if (httpIndex !== -1 && split.length > httpIndex + 3) {
+      host = split[httpIndex + 2];
+      const hostSplit = host.split(".");
+      if (hostSplit.length > 1) {
+        lessHost = `${hostSplit[hostSplit.length - 2]}.${hostSplit[hostSplit.length - 1]}`;
+      }
     }
+
+    const firstPart =
+      url.indexOf("sketchfab.com") !== -1 ? "Sketchfab" : url.indexOf("youtube.com") !== -1 ? "YouTube" : lessHost;
+
+    return `${firstPart} ... ${resourceName.substr(0, 4)}`;
   }
-
-  const firstPart =
-    url.indexOf("sketchfab.com") !== -1 ? "Sketchfab" : url.indexOf("youtube.com") !== -1 ? "YouTube" : lessHost;
-
-  return `${firstPart} ... ${resourceName.substr(0, 4)}`;
 }
 
 const ObjectListContext = createContext({
